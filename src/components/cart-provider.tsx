@@ -8,20 +8,23 @@ import {
   useState,
 } from "react";
 
-type CartItem = {
+export type CartItem = {
   product_id: number;
   name: string;
   slug: string;
   unit_price: number;
   quantity: number;
+  image_url?: string | null;
 };
 
 type CartContextType = {
   items: CartItem[];
   addToCart: (item: CartItem) => void;
   removeFromCart: (productId: number) => void;
+  updateQuantity: (productId: number, quantity: number) => void;
   clearCart: () => void;
   total: number;
+  itemCount: number;
 };
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -64,6 +67,19 @@ export function CartProvider({
     setItems((prev) => prev.filter((item) => item.product_id !== productId));
   }
 
+  function updateQuantity(productId: number, quantity: number) {
+    if (quantity < 1) {
+      removeFromCart(productId);
+      return;
+    }
+
+    setItems((prev) =>
+      prev.map((item) =>
+        item.product_id === productId ? { ...item, quantity } : item
+      )
+    );
+  }
+
   function clearCart() {
     setItems([]);
   }
@@ -73,9 +89,22 @@ export function CartProvider({
     [items]
   );
 
+  const itemCount = useMemo(
+    () => items.reduce((sum, item) => sum + item.quantity, 0),
+    [items]
+  );
+
   return (
     <CartContext.Provider
-      value={{ items, addToCart, removeFromCart, clearCart, total }}
+      value={{
+        items,
+        addToCart,
+        removeFromCart,
+        updateQuantity,
+        clearCart,
+        total,
+        itemCount,
+      }}
     >
       {children}
     </CartContext.Provider>

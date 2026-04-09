@@ -1,4 +1,6 @@
 import { supabase } from "@/lib/supabase";
+import Link from "next/link";
+import Image from "next/image";
 
 export default async function ProductsPage() {
   const { data: products, error } = await supabase
@@ -26,16 +28,26 @@ export default async function ProductsPage() {
 
         <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {products?.map((product) => (
-            <a
+            <Link
               key={product.id}
               href={`/products/${product.slug}`}
               className="rounded-2xl border border-gray-200 p-6 transition hover:shadow-sm"
             >
-              <div className="aspect-square rounded-xl bg-gray-100" />
+<div className="relative aspect-square overflow-hidden rounded-xl bg-gray-100">
+  {product.image_url ? (
+    <Image
+      src={product.image_url}
+      alt={product.name}
+      fill
+      className="object-cover"
+      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+    />
+  ) : null}
+</div>
               <h2 className="mt-4 text-xl font-semibold">{product.name}</h2>
               <p className="mt-2 text-sm text-gray-600">{product.description}</p>
               <p className="mt-4 text-base font-medium">£{product.price}</p>
-            </a>
+            </Link>
           ))}
         </div>
       </div>

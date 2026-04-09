@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { useCart } from "@/components/cart-provider";
+import Image from "next/image";
 
 export default function CartPage() {
-  const { items, total, removeFromCart } = useCart();
+  const { items, total, removeFromCart, updateQuantity } = useCart();
 
   return (
     <main className="min-h-screen bg-white px-6 py-16 text-gray-900">
@@ -24,22 +25,60 @@ export default function CartPage() {
             </div>
           ) : (
             <>
-              <div className="space-y-4">
+              <div className="space-y-6">
                 {items.map((item) => (
                   <div
                     key={item.product_id}
                     className="flex items-center justify-between border-b border-gray-200 pb-4"
                   >
-                    <div>
-                      <h2 className="font-semibold">{item.name}</h2>
-                      <p className="text-sm text-gray-600">
-                        Qty: {item.quantity}
-                      </p>
+                    <div className="flex items-center gap-4">
+<div className="relative h-20 w-20 overflow-hidden rounded-xl bg-gray-100">
+  {item.image_url ? (
+    <Image
+      src={item.image_url}
+      alt={item.name}
+      fill
+      className="object-cover"
+      sizes="80px"
+    />
+  ) : null}
+</div>
+
+                      <div>
+                        <h2 className="font-semibold">{item.name}</h2>
+                        <p className="text-sm text-gray-600">
+                          £{item.unit_price} each
+                        </p>
+
+                        <div className="mt-3 flex items-center gap-3">
+                          <button
+                            onClick={() =>
+                              updateQuantity(item.product_id, item.quantity - 1)
+                            }
+                            className="h-8 w-8 rounded-full border border-gray-300"
+                          >
+                            -
+                          </button>
+
+                          <span className="min-w-6 text-center text-sm font-medium">
+                            {item.quantity}
+                          </span>
+
+                          <button
+                            onClick={() =>
+                              updateQuantity(item.product_id, item.quantity + 1)
+                            }
+                            className="h-8 w-8 rounded-full border border-gray-300"
+                          >
+                            +
+                          </button>
+                        </div>
+                      </div>
                     </div>
 
                     <div className="text-right">
                       <p className="font-medium">
-                        £{item.unit_price * item.quantity}
+                        £{(item.unit_price * item.quantity).toFixed(2)}
                       </p>
                       <button
                         onClick={() => removeFromCart(item.product_id)}
@@ -54,7 +93,7 @@ export default function CartPage() {
 
               <div className="mt-6 flex items-center justify-between">
                 <p className="text-lg font-semibold">Total</p>
-                <p className="text-lg font-semibold">£{total}</p>
+                <p className="text-lg font-semibold">£{total.toFixed(2)}</p>
               </div>
 
               <Link

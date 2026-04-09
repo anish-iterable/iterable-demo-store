@@ -107,20 +107,22 @@ export default function CheckoutPage() {
             {items.map((item) => (
               <div
                 key={item.product_id}
-                className="flex items-center justify-between"
+                className="flex items-center justify-between gap-4"
               >
                 <div>
                   <p className="font-medium">{item.name}</p>
-                  <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
+                  <p className="text-sm text-gray-500">
+                    Qty: {item.quantity} × £{item.unit_price}
+                  </p>
                 </div>
-                <p>£{item.unit_price * item.quantity}</p>
+                <p>£{(item.unit_price * item.quantity).toFixed(2)}</p>
               </div>
             ))}
           </div>
 
           <div className="mt-6 flex items-center justify-between border-t border-gray-200 pt-4">
             <p className="font-semibold">Total</p>
-            <p className="font-semibold">£{total}</p>
+            <p className="font-semibold">£{total.toFixed(2)}</p>
           </div>
         </aside>
       </div>

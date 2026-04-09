@@ -1,6 +1,7 @@
 import AddToCartButton from "@/components/add-to-cart-button";
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
+import Image from "next/image";
 
 export default async function ProductDetailPage({
   params,
@@ -31,7 +32,17 @@ export default async function ProductDetailPage({
   return (
     <main className="min-h-screen bg-white px-6 py-16 text-gray-900">
       <div className="mx-auto grid max-w-6xl gap-10 md:grid-cols-2">
-        <div className="aspect-square rounded-2xl bg-gray-100" />
+<div className="relative aspect-square overflow-hidden rounded-2xl bg-gray-100">
+  {product.image_url ? (
+    <Image
+      src={product.image_url}
+      alt={product.name}
+      fill
+      className="object-cover"
+      sizes="(max-width: 768px) 100vw, 50vw"
+    />
+  ) : null}
+</div>
 
         <div>
           <p className="text-sm uppercase tracking-[0.2em] text-gray-500">
@@ -48,13 +59,14 @@ export default async function ProductDetailPage({
 
           <div className="mt-8 flex gap-4">
             <AddToCartButton
-              product={{
-                id: product.id,
-                name: product.name,
-                slug: product.slug,
-                price: Number(product.price),
-              }}
-            />
+  product={{
+    id: product.id,
+    name: product.name,
+    slug: product.slug,
+    price: Number(product.price),
+    image_url: product.image_url,
+  }}
+/>
 
             <Link
               href="/checkout"
