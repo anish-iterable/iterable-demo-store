@@ -2,7 +2,8 @@
 
 import { useCart } from "@/components/cart-provider";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { trackIterableEvent } from "@/lib/iterable-web";
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -13,6 +14,20 @@ export default function CheckoutPage() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    if (items.length > 0) {
+      trackIterableEvent("Checkout Started", {
+        total,
+        items: items.map((item) => ({
+          productId: item.product_id,
+          productName: item.name,
+          quantity: item.quantity,
+          unitPrice: item.unit_price,
+        })),
+      }).catch(console.error);
+    }
+  }, [items, total]);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();

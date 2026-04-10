@@ -6,6 +6,10 @@ import { createClient } from "@/lib/supabase-browser";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/toast-provider";
+import {
+  identifyIterableUser,
+  logoutIterableUser,
+} from "@/lib/iterable-web";
 
 type AuthUser = {
   email?: string;
@@ -26,6 +30,10 @@ export default function SiteHeader() {
       } = await supabase.auth.getUser();
 
       setUser(user ? { email: user.email } : null);
+
+      if (user?.email) {
+        identifyIterableUser(user.email).catch(console.error);
+      }
     }
 
     loadUser();
@@ -34,6 +42,10 @@ export default function SiteHeader() {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ? { email: session.user.email } : null);
+
+      if (session?.user?.email) {
+        identifyIterableUser(session.user.email).catch(console.error);
+      }
     });
 
     return () => subscription.unsubscribe();
@@ -41,6 +53,7 @@ export default function SiteHeader() {
 
   async function handleLogout() {
     await supabase.auth.signOut();
+    await logoutIterableUser().catch(console.error);
     showToast("Logged out");
     router.push("/");
     router.refresh();

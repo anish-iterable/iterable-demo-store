@@ -2,6 +2,7 @@ import "./globals.css";
 import { CartProvider } from "@/components/cart-provider";
 import SiteHeader from "@/components/site-header";
 import { ToastProvider } from "@/components/toast-provider";
+import IterableInit from "@/components/iterable-init";
 
 export const metadata = {
   title: "Iterable Demo Store",
@@ -16,12 +17,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="bg-white text-gray-900 antialiased">
-        <ToastProvider>
-          <CartProvider>
-            <SiteHeader />
-            {children}
-          </CartProvider>
-        </ToastProvider>
+<ToastProvider>
+  <CartProvider>
+    <IterableInit />
+    <SiteHeader />
+    {children}
+  </CartProvider>
+</ToastProvider>
       </body>
     </html>
   );

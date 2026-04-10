@@ -1,11 +1,28 @@
 "use client";
 
 import Link from "next/link";
-import { useCart } from "@/components/cart-provider";
 import Image from "next/image";
+import { useCart } from "@/components/cart-provider";
+import { useEffect } from "react";
+import { trackIterableEvent } from "@/lib/iterable-web";
 
 export default function CartPage() {
   const { items, total, removeFromCart, updateQuantity } = useCart();
+
+  useEffect(() => {
+    if (items.length > 0) {
+      trackIterableEvent("Cart Viewed", {
+        itemCount: items.length,
+        total,
+        items: items.map((item) => ({
+          productId: item.product_id,
+          productName: item.name,
+          quantity: item.quantity,
+          unitPrice: item.unit_price,
+        })),
+      }).catch(console.error);
+    }
+  }, [items, total]);
 
   return (
     <main className="min-h-screen bg-white px-6 py-16 text-gray-900">
@@ -32,17 +49,17 @@ export default function CartPage() {
                     className="flex items-center justify-between border-b border-gray-200 pb-4"
                   >
                     <div className="flex items-center gap-4">
-<div className="relative h-20 w-20 overflow-hidden rounded-xl bg-gray-100">
-  {item.image_url ? (
-    <Image
-      src={item.image_url}
-      alt={item.name}
-      fill
-      className="object-cover"
-      sizes="80px"
-    />
-  ) : null}
-</div>
+                      <div className="relative h-20 w-20 overflow-hidden rounded-xl bg-gray-100">
+                        {item.image_url ? (
+                          <Image
+                            src={item.image_url}
+                            alt={item.name}
+                            fill
+                            className="object-cover"
+                            sizes="80px"
+                          />
+                        ) : null}
+                      </div>
 
                       <div>
                         <h2 className="font-semibold">{item.name}</h2>

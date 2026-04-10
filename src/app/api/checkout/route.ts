@@ -1,10 +1,17 @@
 import { supabase } from "@/lib/supabase";
+import {
+  iterableTrackPurchase,
+  iterableUsersUpdate,
+} from "@/lib/iterable-server";
 import { NextResponse } from "next/server";
 
 type CheckoutItem = {
   product_id: number;
   quantity: number;
   unit_price: number;
+  name?: string;
+  slug?: string;
+  image_url?: string | null;
 };
 
 export async function POST(request: Request) {
@@ -105,14 +112,45 @@ export async function POST(request: Request) {
       );
     }
 
+    await iterableUsersUpdate({
+      email,
+      dataFields: {
+        firstName,
+        lastName,
+        lastOrderId: order.id,
+        lastOrderTotal: totalAmount,
+        lastPurchaseAt: new Date().toISOString(),
+      },
+    });
+
+    await iterableTrackPurchase({
+      email,
+      total: totalAmount,
+      items: items.map((item) => ({
+        id: String(item.product_id),
+        sku: String(item.product_id),
+        name: item.name ?? `Product ${item.product_id}`,
+        price: item.unit_price,
+        quantity: item.quantity,
+        imageUrl: item.image_url ?? null,
+        url: item.slug
+          ? `${process.env.NEXT_PUBLIC_SITE_URL}/products/${item.slug}`
+          : undefined,
+      })),
+      dataFields: {
+        orderId: order.id,
+        source: "website_checkout",
+      },
+    });
+
     return NextResponse.json({
       success: true,
       orderId: order.id,
     });
-  } catch {
-    return NextResponse.json(
-      { error: "Something went wrong." },
-      { status: 500 }
-    );
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Something went wrong.";
+
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

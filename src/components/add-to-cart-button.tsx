@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useCart } from "./cart-provider";
 import { useToast } from "./toast-provider";
+import { trackIterableEvent } from "@/lib/iterable-web";
 
 type Props = {
   product: {
@@ -28,6 +29,14 @@ export default function AddToCartButton({ product }: Props) {
       quantity: 1,
       image_url: product.image_url ?? null,
     });
+
+    trackIterableEvent("Add To Cart", {
+      productId: product.id,
+      productName: product.name,
+      productSlug: product.slug,
+      price: product.price,
+      quantity: 1,
+    }).catch(console.error);
 
     setAdded(true);
     showToast(`${product.name} added to cart`);

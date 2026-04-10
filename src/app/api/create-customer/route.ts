@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase";
+import { iterableUsersUpdate } from "@/lib/iterable-server";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
@@ -19,27 +20,35 @@ export async function POST(request: Request) {
       .eq("email", email)
       .maybeSingle();
 
-    if (existingCustomer) {
-      return NextResponse.json({ success: true, existing: true });
+    if (!existingCustomer) {
+      const { error } = await supabase.from("customers").insert([
+        {
+          first_name: firstName,
+          last_name: lastName,
+          email,
+        },
+      ]);
+
+      if (error) {
+        return NextResponse.json({ error: error.message }, { status: 500 });
+      }
     }
 
-    const { error } = await supabase.from("customers").insert([
-      {
-        first_name: firstName,
-        last_name: lastName,
-        email,
+    await iterableUsersUpdate({
+      email,
+      dataFields: {
+        firstName,
+        lastName,
+        signupSource: "website_register",
+        accountStatus: "registered",
       },
-    ]);
-
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
-    }
+    });
 
     return NextResponse.json({ success: true });
-  } catch {
-    return NextResponse.json(
-      { error: "Something went wrong." },
-      { status: 500 }
-    );
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Something went wrong.";
+
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
